@@ -1,0 +1,6 @@
+{
+  "name": "Chinabadam",
+  "description": "অচেনা থেকে আপনজন - Chinabadam Social, Live Map & Community Platform",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
