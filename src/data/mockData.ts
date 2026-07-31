@@ -13,6 +13,7 @@ import {
 
 export const initialCurrentUser: UserProfile = {
   id: "user_me",
+  isAdmin: true, // App Owner / Admin
   phone: "+8801712345678", // HIDDEN IN PUBLIC VIEW
   realName: "মোহাম্মদ রাফসান তানভীর",
   avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250",
@@ -502,6 +503,52 @@ export const mockNotifications: AppNotification[] = [
 ];
 
 export const mockConversations: Conversation[] = [
+  {
+    id: "group_1",
+    peerUser: mockNearbyUsers[0],
+    isGroup: true,
+    groupName: "☕ ধানমন্ডি চা-আড্ডা গ্রুপ",
+    groupAvatar: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&q=80&w=250",
+    groupDescription: "ধানমন্ডি এলাকার বন্ধুদের আড্ডা, চা খোর সংঘ ও সাপ্তাহিক দেখা করার গ্রুপ ☕",
+    groupMembers: [mockNearbyUsers[0], mockNearbyUsers[1], mockNearbyUsers[2]],
+    groupAdminId: "user_me",
+    lastMessage: "তাহমিদ: 'আজকে বিকালে ৪ নম্বর রোডের চায়ের দোকানে কারা আসছো?'",
+    lastMessageTime: "১:১৫ PM",
+    unreadCount: 2,
+    isVoiceCallActive: true,
+    messages: [
+      {
+        id: "gm_101",
+        senderId: "user_1",
+        receiverId: "group_1",
+        senderName: "তাহমিদ হাসান",
+        senderAvatar: mockNearbyUsers[0].avatar,
+        text: "আসসালামু আলাইকুম বন্ধুরা! নতুন গ্রুপ কেমন লাগছে?",
+        timestamp: "১২:১৫ PM",
+        isRead: true
+      },
+      {
+        id: "gm_102",
+        senderId: "user_2",
+        receiverId: "group_1",
+        senderName: "নুসরাত জাহান মিম",
+        senderAvatar: mockNearbyUsers[1].avatar,
+        text: "ওয়া আলাইকুমুস সালাম! চিনা বাদামে বন্ধুরা মিলে গ্রুপ খোলার অপশন পেয়ে খুব ভালো লাগছে! 🎉",
+        timestamp: "১২:১৮ PM",
+        isRead: true
+      },
+      {
+        id: "gm_103",
+        senderId: "user_1",
+        receiverId: "group_1",
+        senderName: "তাহমিদ হাসান",
+        senderAvatar: mockNearbyUsers[0].avatar,
+        text: "আজকে বিকালে ৪ নম্বর রোডের চায়ের দোকানে কারা আসছো?",
+        timestamp: "১:১৫ PM",
+        isRead: false
+      }
+    ]
+  },
   {
     id: "conv_1",
     peerUser: mockNearbyUsers[1], // Nusrath

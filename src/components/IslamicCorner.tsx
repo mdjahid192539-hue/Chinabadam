@@ -32,6 +32,7 @@ import {
   District,
   Thana
 } from "../data/bangladeshLocations";
+import { GpsJourneyPrayerTracker } from "./GpsJourneyPrayerTracker";
 
 export const IslamicCorner: React.FC = () => {
   const { mosques, t, language } = useApp();
@@ -411,6 +412,9 @@ export const IslamicCorner: React.FC = () => {
       {activeTab === "times" && (
         <div className="space-y-4">
           
+          {/* GPS Journey & Satellite Prayer Times Tracker */}
+          <GpsJourneyPrayerTracker />
+
           {/* Featured Live Sunrise Quick Card */}
           <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white p-4.5 rounded-3xl shadow-md border border-amber-300 relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3 z-10">

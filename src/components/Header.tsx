@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useApp } from "../context/AppContext";
-import { Bell, Globe, Search, UserCheck, ShieldCheck, Sparkles, MessageCircle, Moon, Sun } from "lucide-react";
+import { Bell, Globe, Search, UserCheck, ShieldCheck, Sparkles, MessageCircle, Moon, Sun, Palette } from "lucide-react";
 import { motion } from "motion/react";
 import { LanguageSelectorModal } from "./LanguageSelectorModal";
 import { SUPPORTED_LANGUAGES } from "../utils/translations";
@@ -15,7 +15,8 @@ export const Header: React.FC = () => {
     setActiveTab,
     activeTab,
     currentUser,
-    setIsLoginModalOpen
+    setIsLoginModalOpen,
+    setIsLogoModalOpen
   } = useApp();
 
   const [isLangModalOpen, setIsLangModalOpen] = useState(false);
@@ -29,15 +30,29 @@ export const Header: React.FC = () => {
         <div className="flex items-center justify-between h-16">
           
           {/* Logo & Slogan */}
-          <div
-            onClick={() => setActiveTab("home")}
-            className="flex items-center gap-2 cursor-pointer group"
-          >
-            <ChinabadamLogo size="md" showText={true} textColor="text-white" />
-            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500 text-white shadow-xs shrink-0 self-start mt-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
-              {language === "bn" ? "লাইভ" : "Live"}
-            </span>
+          <div className="flex items-center gap-2">
+            <div
+              onClick={() => setActiveTab("home")}
+              className="flex items-center gap-2 cursor-pointer group"
+            >
+              <ChinabadamLogo size="md" showText={true} textColor="text-white" />
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500 text-white shadow-xs shrink-0 self-start mt-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+                {language === "bn" ? "লাইভ" : "Live"}
+              </span>
+            </div>
+
+            {/* Quick Logo Customizer Trigger */}
+            <button
+              onClick={() => setIsLogoModalOpen(true)}
+              className="p-1.5 rounded-xl bg-blue-800/80 hover:bg-blue-900 text-amber-300 border border-blue-600/70 transition active:scale-95 text-xs font-bold flex items-center gap-1 shadow-xs"
+              title={language === "bn" ? "অ্যাপের লোগো ও ব্র্যান্ডিং কাস্টমাইজ করুন" : "Customize App Logo"}
+            >
+              <Palette className="w-4 h-4 text-amber-300" />
+              <span className="hidden sm:inline text-[10px] text-blue-100 font-extrabold">
+                {language === "bn" ? "লোগো ডিজাইন" : "Logo Design"}
+              </span>
+            </button>
           </div>
 
           {/* Center Navigation Shortcuts for Desktop */}

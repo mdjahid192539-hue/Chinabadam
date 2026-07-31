@@ -48,6 +48,7 @@ export interface WithdrawRecord {
 
 export interface UserProfile {
   id: string;
+  isAdmin?: boolean; // App Owner / Admin permission flag for Logo & System Customization
   phone: string; // Hidden in public UI!
   realName: string; // Mandatory real name (আসল নাম)
   avatar: string;
@@ -102,10 +103,23 @@ export interface GlobalUser {
   requestPending?: boolean;
 }
 
+export interface LogoConfig {
+  iconType: "peanut" | "sparkle" | "crescent" | "chat" | "crown" | "shield" | "globe" | "custom_image";
+  customImageUrl?: string;
+  themeGradient: "emerald_gold" | "royal_blue" | "neon_purple" | "sunset_orange" | "crimson_red" | "golden_luxury";
+  shape: "classic_circle" | "rounded_squircle" | "glowing_hexagon" | "pill_badge";
+  appTitle: string;
+  appSubtitle: string;
+  showGlow: boolean;
+  isAnimated: boolean;
+}
+
 export interface ChatMessage {
   id: string;
   senderId: string;
   receiverId: string;
+  senderName?: string;
+  senderAvatar?: string;
   text?: string;
   imageUrl?: string;
   audioUrl?: string;
@@ -121,6 +135,14 @@ export interface Conversation {
   lastMessageTime: string;
   unreadCount: number;
   messages: ChatMessage[];
+  // Group Chat Attributes
+  isGroup?: boolean;
+  groupName?: string;
+  groupAvatar?: string;
+  groupDescription?: string;
+  groupMembers?: (NearbyUser | GlobalUser)[];
+  groupAdminId?: string;
+  isVoiceCallActive?: boolean;
 }
 
 export type CircleCategory = 

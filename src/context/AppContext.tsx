@@ -12,7 +12,8 @@ import {
   SportsGame,
   AppNotification,
   Conversation,
-  ChatMessage
+  ChatMessage,
+  LogoConfig,
 } from "../types";
 import {
   initialCurrentUser,
@@ -67,6 +68,16 @@ interface AppContextType {
   requestWithdrawal: (amount: number, method: "bkash" | "nagad" | "rocket" | "recharge", accountNumber: string) => { success: boolean; message: string };
   isLoginModalOpen: boolean;
   setIsLoginModalOpen: (open: boolean) => void;
+  
+  // Logo Customization State & Functions
+  logoConfig: LogoConfig;
+  updateLogoConfig: (updated: Partial<LogoConfig>) => void;
+  resetLogoConfig: () => void;
+  isLogoModalOpen: boolean;
+  setIsLogoModalOpen: (open: boolean) => void;
+
+  // Group Chat Creation
+  createGroupChat: (groupName: string, description: string, members: (NearbyUser | GlobalUser)[], avatarUrl?: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -87,7 +98,98 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [sportsGames, setSportsGames] = useState<SportsGame[]>(mockSportsGames);
   const [selectedMapTab, setSelectedMapTab] = useState<"nearby" | "global">("nearby");
   const [mapFilter, setMapFilter] = useState<"all" | "users" | "mosques" | "tourism" | "sports">("all");
+  const defaultLogoConfig: LogoConfig = {
+    iconType: "peanut",
+    themeGradient: "emerald_gold",
+    shape: "classic_circle",
+    appTitle: "চিনা বাদাম",
+    appSubtitle: "দেশজুড়ে বন্ধু ও সামাজিক নেটওয়ার্ক",
+    showGlow: true,
+    isAnimated: true,
+  };
+
+  const [logoConfig, setLogoConfig] = useState<LogoConfig>(() => {
+    try {
+      const saved = localStorage.getItem("chinabadam_logo_config");
+      return saved ? JSON.parse(saved) : defaultLogoConfig;
+    } catch {
+      return defaultLogoConfig;
+    }
+  });
+
+  const [isLogoModalOpen, setIsLogoModalOpen] = useState<boolean>(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
+
+  const updateLogoConfig = (updated: Partial<LogoConfig>) => {
+    setLogoConfig((prev) => {
+      const newConf = { ...prev, ...updated };
+      try {
+        localStorage.setItem("chinabadam_logo_config", JSON.stringify(newConf));
+      } catch (e) {
+        console.error(e);
+      }
+      return newConf;
+    });
+  };
+
+  const resetLogoConfig = () => {
+    setLogoConfig(defaultLogoConfig);
+    try {
+      localStorage.removeItem("chinabadam_logo_config");
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const createGroupChat = (
+    groupName: string,
+    description: string,
+    members: (NearbyUser | GlobalUser)[],
+    avatarUrl?: string
+  ) => {
+    const groupId = `group_${Date.now()}`;
+    const newGroupConv: Conversation = {
+      id: groupId,
+      peerUser: members[0] || mockNearbyUsers[0],
+      isGroup: true,
+      groupName,
+      groupAvatar: avatarUrl || "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&q=80&w=250",
+      groupDescription: description || "বন্ধুদের নতুন গ্রুপ আড্ডা ☕",
+      groupMembers: members,
+      groupAdminId: currentUser.id,
+      lastMessage: `${currentUser.realName}: 'গ্রুপ তৈরি করা হয়েছে'`,
+      lastMessageTime: "এখনই",
+      unreadCount: 0,
+      messages: [
+        {
+          id: `gm_${Date.now()}`,
+          senderId: currentUser.id,
+          receiverId: groupId,
+          senderName: currentUser.realName,
+          senderAvatar: currentUser.avatar,
+          text: language === "bn"
+            ? `🎉 "${groupName}" গ্রুপ তৈরি করা হয়েছে! সকলে আড্ডায় যোগ দিন।`
+            : `🎉 "${groupName}" group created! Welcome everyone.`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          isRead: true,
+        },
+      ],
+    };
+
+    setConversations((prev) => [newGroupConv, ...prev]);
+    setActiveConversationId(groupId);
+    setActiveTab("chat");
+
+    const newNotif: AppNotification = {
+      id: `n_${Date.now()}`,
+      title: language === "bn" ? "নতুন গ্রুপ তৈরি হয়েছে 🎉" : "Group Created",
+      message: `${groupName} গ্রুপটি তৈরি করা হয়েছে।`,
+      timestamp: "এখনই",
+      isRead: false,
+      type: "circle",
+    };
+    setNotifications((prev) => [newNotif, ...prev]);
+  };
 
   const t = (key: Parameters<typeof getTranslation>[1]) => getTranslation(language, key);
 
@@ -364,6 +466,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         requestWithdrawal,
         isLoginModalOpen,
         setIsLoginModalOpen,
+        logoConfig,
+        updateLogoConfig,
+        resetLogoConfig,
+        isLogoModalOpen,
+        setIsLogoModalOpen,
+        createGroupChat,
       }}
     >
       {children}

@@ -13,7 +13,10 @@ import {
   Check,
   Heart,
   Clock,
-  Sparkles
+  Sparkles,
+  Radio,
+  LocateFixed,
+  Navigation
 } from "lucide-react";
 import { motion } from "motion/react";
 
@@ -25,9 +28,11 @@ export const HomeView: React.FC = () => {
     setSelectedMapTab,
     t,
     language,
+    setIsLogoModalOpen,
     sendFriendRequest,
     startChatWithUser,
     likePost,
+    currentUser,
   } = useApp();
 
   return (
@@ -77,6 +82,14 @@ export const HomeView: React.FC = () => {
               <span>👥 {t("people")}</span>
             </button>
 
+            <button
+              onClick={() => setIsLogoModalOpen(true)}
+              className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-4 py-2.5 rounded-xl border border-amber-300 transition active:scale-95 flex items-center gap-1.5 shadow-sm"
+            >
+              <Sparkles className="w-4 h-4 text-slate-950" />
+              <span>{language === "bn" ? "🎨 লোগো ডিজাইন" : "🎨 Customize Logo"}</span>
+            </button>
+
             <div className="ml-auto hidden sm:flex items-center gap-1 bg-black/20 px-3 py-1.5 rounded-xl text-[11px] font-bold border border-white/20">
               <ShieldCheck className="w-4 h-4 text-emerald-300" />
               <span>{t("phoneHidden")}</span>
@@ -87,6 +100,41 @@ export const HomeView: React.FC = () => {
 
       {/* Real-time Dedicated Event Alerts System */}
       <EventAlertsBanner />
+
+      {/* GPS Journey & Satellite Prayer Times Quick Card */}
+      <div className="bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 text-white rounded-3xl p-4.5 sm:p-5 shadow-md border border-emerald-500/40 relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5 z-10">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-300 shrink-0 shadow-inner">
+            <Radio className="w-6 h-6 animate-pulse text-emerald-400" />
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+              <span className="text-[10px] font-black uppercase tracking-wider text-emerald-300">
+                {language === "bn" ? "আজকের যাত্রাপথ জিপিএস নামাজ ট্র্যাকার" : "GPS Journey Prayer Tracker"}
+              </span>
+            </div>
+            <h3 className="font-extrabold text-sm sm:text-base mt-0.5 text-white">
+              {language === "bn"
+                ? "যাত্রাপথে নামাজের চিন্তা? জিপিএস অন করে সঠিক সময় ও কাউন্টডাউন দেখুন!"
+                : "Travelling today? Turn on GPS for live moving district prayer countdowns!"}
+            </h3>
+            <p className="text-xs text-slate-300 font-medium">
+              {language === "bn"
+                ? "স্যাটেলাইট জিপিএস ডেটা দিয়ে আপনি যে জেলায় থাকবেন, সেই জেলার নামাজের প্রতিটি ওয়াক্তের বাকি সময় হিসাব করে দেবে।"
+                : "Calculates live remaining prayer time in real-time as you travel across districts."}
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setActiveTab("islamic")}
+          className="z-10 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-black text-xs px-4 py-3 rounded-2xl shadow-md flex items-center gap-2 shrink-0 transition active:scale-95"
+        >
+          <LocateFixed className="w-4 h-4 text-slate-950" />
+          <span>{language === "bn" ? "📡 জিপিএস নামাজ ট্র্যাকার অন করুন" : "Enable GPS Prayer Tracker"}</span>
+        </button>
+      </div>
 
       {/* Small Triangular Home Page Single Ad */}
       <TriangleHomeAd />

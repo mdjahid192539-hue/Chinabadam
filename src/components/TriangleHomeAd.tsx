@@ -6,7 +6,10 @@ import { motion, AnimatePresence } from "motion/react";
 export const TriangleHomeAd: React.FC = () => {
   const { watchAdAndEarn } = useApp();
   const [isOpen, setIsOpen] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(false);
   const [claimed, setClaimed] = useState(false);
+
+  if (isDismissed) return null;
   const [watching, setWatching] = useState(false);
   const [timeLeft, setTimeLeft] = useState(5);
 
@@ -72,13 +75,23 @@ export const TriangleHomeAd: React.FC = () => {
             </div>
           </div>
 
-          {/* Trigger Button */}
-          <button
-            onClick={() => setIsOpen(true)}
-            className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-[11px] px-3 py-1.5 rounded-xl shrink-0 shadow-xs active:scale-95 transition flex items-center gap-1"
-          >
-            <span>{claimed ? "অর্জিত ✅" : "এড দেখুন ➡️"}</span>
-          </button>
+          {/* Trigger & Close Buttons */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              onClick={() => setIsOpen(true)}
+              className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-[11px] px-3 py-1.5 rounded-xl shadow-xs active:scale-95 transition flex items-center gap-1"
+            >
+              <span>{claimed ? "অর্জিত ✅" : "এড দেখুন ➡️"}</span>
+            </button>
+
+            <button
+              onClick={() => setIsDismissed(true)}
+              className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition"
+              title="বন্ধ করুন"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
 

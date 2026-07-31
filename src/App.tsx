@@ -14,6 +14,7 @@ import { NotificationsView } from "./components/NotificationsView";
 import { SettingsView } from "./components/SettingsView";
 import { FindPeople } from "./components/FindPeople";
 import { AuthModal } from "./components/AuthModal";
+import { LogoCustomizerModal } from "./components/LogoCustomizerModal";
 
 const MainContent: React.FC = () => {
   const { activeTab } = useApp();
@@ -43,6 +44,7 @@ export default function App() {
         <MainContent />
         <BottomNav />
         <AuthModal />
+        <LogoCustomizerModal />
       </div>
     </AppProvider>
   );

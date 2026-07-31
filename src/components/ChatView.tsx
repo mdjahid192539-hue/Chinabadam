@@ -32,6 +32,8 @@ import {
   Moon
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { CreateGroupModal } from "./CreateGroupModal";
+import { PhoneCall, UserPlus, Volume2, MicOff, Radio } from "lucide-react";
 
 interface AddaRoom {
   id: string;
@@ -80,7 +82,10 @@ export const ChatView: React.FC = () => {
   // Mode: "private" (1-on-1) or "adda_lounge" (Public Topic & Voice Rooms)
   const [chatTab, setChatTab] = useState<"private" | "adda_lounge">("private");
 
-  // Private Chat States
+  // Private & Group Chat States
+  const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
+  const [isGroupVoiceActive, setIsGroupVoiceActive] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
   const [inputMsg, setInputMsg] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isRecordingVoice, setIsRecordingVoice] = useState(false);
@@ -663,22 +668,35 @@ export const ChatView: React.FC = () => {
               activeConversationId ? "hidden md:flex" : "flex"
             }`}
           >
-            <div className="p-3.5 border-b border-slate-200 bg-white">
+            <div className="p-3.5 border-b border-slate-200 bg-white space-y-2">
               <div className="flex items-center justify-between">
                 <h3 className="font-extrabold text-xs text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                   <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                  <span>{language === "bn" ? "সাম্প্রতিক প্রাইভেট চ্যাট" : "Private Chats"}</span>
+                  <span>{language === "bn" ? "চ্যাট ও গ্রুপ আড্ডা" : "Chats & Groups"}</span>
                 </h3>
                 <span className="text-[10px] font-extrabold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200">
-                  {conversations.length} {language === "bn" ? "জন সক্রিয়" : "active"}
+                  {conversations.length} {language === "bn" ? "টি কথোপকথন" : "active"}
                 </span>
               </div>
+
+              {/* Create Group Button */}
+              <button
+                onClick={() => setIsCreateGroupOpen(true)}
+                className="w-full bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 hover:from-blue-800 hover:to-indigo-800 text-white font-extrabold text-xs py-2 px-3 rounded-2xl shadow-sm flex items-center justify-center gap-1.5 transition active:scale-95"
+              >
+                <Users className="w-4 h-4 text-amber-300" />
+                <span>{language === "bn" ? "➕ বন্ধুদের গ্রুপ তৈরি করুন" : "➕ Create Friends Group"}</span>
+              </button>
             </div>
 
             {/* Conversation Items List */}
             <div className="flex-1 overflow-y-auto divide-y divide-slate-200/60">
               {conversations.map((conv) => {
                 const isSelected = conv.id === activeConversationId;
+                const isGroup = conv.isGroup;
+                const title = isGroup ? conv.groupName : conv.peerUser.realName;
+                const avatar = isGroup ? conv.groupAvatar : conv.peerUser.avatar;
+
                 return (
                   <div
                     key={conv.id}
@@ -689,21 +707,33 @@ export const ChatView: React.FC = () => {
                   >
                     <div className="relative shrink-0">
                       <img
-                        src={conv.peerUser.avatar}
-                        alt={conv.peerUser.realName}
-                        className="w-11 h-11 rounded-2xl object-cover border border-slate-300 shadow-2xs"
+                        src={avatar}
+                        alt={title}
+                        className={`w-11 h-11 object-cover border shadow-2xs ${
+                          isGroup ? "rounded-2xl border-indigo-400 ring-2 ring-indigo-200" : "rounded-2xl border-slate-300"
+                        }`}
                       />
-                      {conv.peerUser.isOnline && (
+                      {!isGroup && conv.peerUser.isOnline && (
                         <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+                      )}
+                      {isGroup && (
+                        <span className="absolute -bottom-1 -right-1 bg-purple-700 text-white p-0.5 rounded-full text-[8px] shadow-xs">
+                          👥
+                        </span>
                       )}
                     </div>
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <h4 className="font-extrabold text-xs text-slate-900 truncate">
-                          {conv.peerUser.realName}
+                        <h4 className="font-extrabold text-xs text-slate-900 truncate flex items-center gap-1">
+                          <span className="truncate">{title}</span>
+                          {isGroup && (
+                            <span className="text-[9px] bg-purple-100 text-purple-800 font-extrabold px-1.5 py-0.2 rounded-full shrink-0">
+                              গ্রুপ
+                            </span>
+                          )}
                         </h4>
-                        <span className="text-[9px] font-medium text-slate-400">
+                        <span className="text-[9px] font-medium text-slate-400 shrink-0">
                           {conv.lastMessageTime}
                         </span>
                       </div>
@@ -744,30 +774,60 @@ export const ChatView: React.FC = () => {
 
                     <div className="relative">
                       <img
-                        src={activeConv.peerUser.avatar}
-                        alt={activeConv.peerUser.realName}
-                        className="w-10 h-10 rounded-xl object-cover border border-blue-600"
+                        src={activeConv.isGroup ? activeConv.groupAvatar : activeConv.peerUser.avatar}
+                        alt={activeConv.isGroup ? activeConv.groupName : activeConv.peerUser.realName}
+                        className={`w-10 h-10 object-cover border ${
+                          activeConv.isGroup ? "rounded-2xl border-indigo-500 ring-2 ring-indigo-200" : "rounded-xl border-blue-600"
+                        }`}
                       />
-                      {activeConv.peerUser.isOnline && (
+                      {!activeConv.isGroup && activeConv.peerUser.isOnline && (
                         <span className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></span>
+                      )}
+                      {activeConv.isGroup && (
+                        <span className="absolute -bottom-1 -right-1 bg-purple-700 text-white text-[8px] px-1 rounded-full shadow-xs">
+                          👥
+                        </span>
                       )}
                     </div>
 
                     <div>
                       <h3 className="font-extrabold text-xs text-slate-900 flex items-center gap-1.5">
-                        <span>{activeConv.peerUser.realName}</span>
-                        <span className="text-[10px] text-emerald-700 bg-emerald-50 font-bold px-2 py-0.2 rounded-full border border-emerald-200">
-                          {activeConv.peerUser.district || (activeConv.peerUser as any).city}
-                        </span>
+                        <span>{activeConv.isGroup ? activeConv.groupName : activeConv.peerUser.realName}</span>
+                        {activeConv.isGroup ? (
+                          <span className="text-[10px] text-purple-800 bg-purple-100 font-extrabold px-2 py-0.2 rounded-full border border-purple-200">
+                            {(activeConv.groupMembers?.length || 1) + 1} জন সদস্য
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-emerald-700 bg-emerald-50 font-bold px-2 py-0.2 rounded-full border border-emerald-200">
+                            {activeConv.peerUser.district || (activeConv.peerUser as any).city}
+                          </span>
+                        )}
                       </h3>
-                      <p className="text-[10px] text-slate-500 font-medium">
-                        🔒 {t("phoneHidden")}
+                      <p className="text-[10px] text-slate-500 font-medium truncate max-w-[200px]">
+                        {activeConv.isGroup
+                          ? (activeConv.groupDescription || "বন্ধুদের গ্রুপ আড্ডা ☕")
+                          : `🔒 ${t("phoneHidden")}`}
                       </p>
                     </div>
                   </div>
 
-                  {/* Header Actions: Stealth Toggle & Wallpaper Settings Button */}
+                  {/* Header Actions */}
                   <div className="flex items-center gap-1.5">
+                    {/* Live Voice Call Toggle Button for Group Chats ("কথা বলার পাশাপাশি") */}
+                    {activeConv.isGroup && (
+                      <button
+                        onClick={() => setIsGroupVoiceActive(!isGroupVoiceActive)}
+                        className={`px-3 py-1.5 rounded-xl text-[11px] font-black transition flex items-center gap-1.5 border shadow-xs ${
+                          isGroupVoiceActive
+                            ? "bg-emerald-600 text-white border-emerald-500 animate-pulse"
+                            : "bg-indigo-700 text-white border-indigo-600 hover:bg-indigo-800"
+                        }`}
+                      >
+                        <PhoneCall className="w-3.5 h-3.5" />
+                        <span>{isGroupVoiceActive ? "লাইভ ভয়েস চালু 🟢" : "ভয়েস কল শুরু 🎙️"}</span>
+                      </button>
+                    )}
+
                     {/* Stealth Disappearing Toggle */}
                     <button
                       onClick={() => setIsStealthMode(!isStealthMode)}
@@ -782,16 +842,60 @@ export const ChatView: React.FC = () => {
                       <span className="hidden sm:inline">{isStealthMode ? "২৪ঘণ্টায় গায়েবী" : "সাধারণ চ্যাট"}</span>
                     </button>
 
-                    {/* WALLPAPER SETTINGS BUTTON (ওয়ালপেপার পরিবর্তন করুন) */}
+                    {/* WALLPAPER SETTINGS BUTTON */}
                     <button
                       onClick={() => setShowWallpaperModal(true)}
                       className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-black px-3 py-1.5 rounded-xl text-[11px] shadow-sm transition flex items-center gap-1.5 border border-amber-400/50"
                     >
                       <Palette className="w-3.5 h-3.5 text-slate-950" />
-                      <span>{language === "bn" ? "ওয়ালপেপার পরিবর্তন" : "Change Wallpaper"}</span>
+                      <span>{language === "bn" ? "ওয়ালপেপার" : "Wallpaper"}</span>
                     </button>
                   </div>
                 </div>
+
+                {/* Live Group Voice Call Overlay Bar (when active) */}
+                {activeConv.isGroup && isGroupVoiceActive && (
+                  <div className="bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 text-white p-2.5 px-4 border-b border-emerald-700/60 flex items-center justify-between shrink-0 shadow-md">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1 bg-emerald-500/20 px-2.5 py-1 rounded-full border border-emerald-400/40">
+                        <Radio className="w-3.5 h-3.5 text-emerald-400 animate-spin" />
+                        <span className="text-[11px] font-black text-emerald-300">
+                          লাইভ গ্রুপ আড্ডা কল চলছে
+                        </span>
+                      </div>
+
+                      {/* Animated Audio Waveforms */}
+                      <div className="hidden sm:flex items-center gap-1">
+                        <span className="w-1 h-3 bg-emerald-400 rounded-full animate-bounce"></span>
+                        <span className="w-1 h-5 bg-emerald-400 rounded-full animate-bounce delay-75"></span>
+                        <span className="w-1 h-2 bg-emerald-400 rounded-full animate-bounce delay-150"></span>
+                        <span className="w-1 h-4 bg-emerald-400 rounded-full animate-bounce delay-100"></span>
+                        <span className="text-[10px] text-emerald-200 font-bold ml-1">
+                          ৩ জন বন্ধু লাইভে যুক্ত আছেন 🎙️
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setIsMuted(!isMuted)}
+                        className={`p-1.5 rounded-xl font-bold text-xs flex items-center gap-1 transition ${
+                          isMuted ? "bg-red-600 text-white" : "bg-emerald-600 text-white hover:bg-emerald-700"
+                        }`}
+                      >
+                        {isMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                        <span className="hidden sm:inline">{isMuted ? "আনমিউট" : "মিউট"}</span>
+                      </button>
+
+                      <button
+                        onClick={() => setIsGroupVoiceActive(false)}
+                        className="bg-red-700 hover:bg-red-800 text-white font-extrabold px-3 py-1.5 rounded-xl text-xs transition"
+                      >
+                        কল ত্যাগ করুন
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {/* Quick Wallpaper Preset Strip (1-Click Swap Bar) */}
                 <div className="bg-slate-900/90 text-white px-3 py-1.5 border-b border-slate-800 flex items-center justify-between text-[10px] gap-2 shrink-0 overflow-x-auto no-scrollbar">
@@ -1586,6 +1690,12 @@ export const ChatView: React.FC = () => {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Create Group Modal */}
+      <CreateGroupModal
+        isOpen={isCreateGroupOpen}
+        onClose={() => setIsCreateGroupOpen(false)}
+      />
 
     </div>
   );
